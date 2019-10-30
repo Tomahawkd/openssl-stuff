@@ -3,9 +3,11 @@ project(crypto CXX C)
 message(STATUS "project ${PROJECT_NAME}")
 
 # Search OpenSSL
-set(OPENSSL_ROOT_DIR /usr/local/Cellar/openssl/1.0.2r)
+set(OPENSSL_ROOT_DIR /usr/local/Cellar/openssl@1.1/1.1.1d)
+include_directories(/usr/local/Cellar/openssl@1.1/1.1.1d/include)
+link_directories(/usr/local/Cellar/openssl@1.1/1.1.1d/lib)
 find_package(openssl REQUIRED)
-pkg_search_module(OPENSSL REQUIRED openssl)
+#pkg_search_module(OPENSSL REQUIRED openssl)
 
 if( OPENSSL_FOUND )
 
@@ -45,3 +47,12 @@ target_link_libraries(server ${OPENSSL_LIBRARIES})
 
 add_executable(client client.c)
 target_link_libraries(client ${OPENSSL_LIBRARIES})
+
+add_executable(drbg drbg_test.c)
+target_link_libraries(drbg ${OPENSSL_LIBRARIES})
+
+add_executable(digest digest.c)
+target_link_libraries(digest ${OPENSSL_LIBRARIES})
+
+add_executable(ciph ciph.c)
+target_link_libraries(ciph ${OPENSSL_LIBRARIES})
