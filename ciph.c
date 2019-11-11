@@ -38,6 +38,32 @@ int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     return ciphertext_len;
 }
 
+int decrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+            unsigned char *iv, unsigned char *ciphertext) {
+    EVP_CIPHER_CTX *ctx;
+    int len;
+    int ciphertext_len;
+
+    if(!(ctx = EVP_CIPHER_CTX_new()))
+        handleErrors();
+
+    if(1 != EVP_DecryptInit_ex(ctx, EVP_sm4_ecb(), NULL, key, iv))
+        handleErrors();
+
+    if(1 != EVP_DecryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+        handleErrors();
+    ciphertext_len = len;
+
+    if(1 != EVP_DecryptFinal_ex(ctx, ciphertext + len, &len))
+        handleErrors();
+    ciphertext_len += len;
+
+    /* Clean up */
+    EVP_CIPHER_CTX_free(ctx);
+
+    return ciphertext_len;
+}
+
 static uint8_t iv[16] = {
         0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f
 };
@@ -61,6 +87,7 @@ int main() {
 
     uint32_t i = 144;
     uint8_t out[144];
+    uint8_t deout[144];
 
     ERR_load_EVP_strings();
 
@@ -69,4 +96,6 @@ int main() {
     for (uint32_t j = 0; j < i; ++j) {
         printf("0x%.2X, ", out[j]);
     }
+
+    decrypt(out, 144, k, iv, deout);
 }
