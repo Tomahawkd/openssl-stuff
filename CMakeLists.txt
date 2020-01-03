@@ -56,3 +56,6 @@ target_link_libraries(digest ${OPENSSL_LIBRARIES})
 
 add_executable(ciph ciph.c)
 target_link_libraries(ciph ${OPENSSL_LIBRARIES})
+
+add_executable(rsa rsa.c)
+target_link_libraries(rsa ${OPENSSL_LIBRARIES})
