@@ -9,6 +9,8 @@
 #include <string.h>
 
 #define BUFFER_LEN 4096
+#define CMP_BUFF_LEN BUFFER_LEN
+#include "file_operation.h"
 
 void handleErrors() {
     printf("%s", ERR_error_string(ERR_get_error(), NULL));
@@ -67,46 +69,6 @@ void decrypt(FILE *in, FILE *out, const EVP_CIPHER *algo, unsigned char *key, un
 
     /* Clean up */
     EVP_CIPHER_CTX_free(ctx);
-}
-
-void gen_data(const char *filename, int size) {
-
-    uint8_t rand[1024];
-    int left;
-    FILE *in = fopen(filename,"wr");
-    if (!in) printf("File err");
-
-    for (int i = 0; i < size/1024; ++i) {
-        arc4random_buf(rand,1024);
-        fwrite(rand, sizeof(uint8_t), 1024, in);
-    }
-
-    left = size % 1024;
-    arc4random_buf(rand, left);
-    fwrite(rand, 1, left, in);
-
-    fclose(in);
-}
-
-int compare_file(const char *f1, const char *f2) {
-    FILE *ff1 = fopen(f1, "r");
-    FILE *ff2 = fopen(f2, "r");
-    uint8_t buf1[BUFFER_LEN];
-    uint8_t buf2[BUFFER_LEN];
-    size_t len1;
-    size_t len2;
-
-    while (1) {
-        int cmp = 0;
-
-        len1 = fread(buf1, 1, BUFFER_LEN, ff1);
-        len2 = fread(buf2, 1, BUFFER_LEN, ff2);
-
-        if (len1 != len2) return (int) (len1 - len2);
-        if ((cmp = memcmp(buf1, buf2, len1)) != 0) return cmp;
-        if ((feof(ff1) && !feof(ff2)) || (!feof(ff1) && feof(ff2))) return -1;
-        if (feof(ff1) && feof(ff2)) return cmp;
-    }
 }
 
 #define ALGORITHM(ALGO, MODE) \
